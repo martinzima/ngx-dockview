@@ -1,6 +1,6 @@
 import { afterNextRender, DestroyRef, Directive, inject, Injector, input, model, OnDestroy } from '@angular/core';
 import { outputToObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AddPanelPositionOptions, FloatingGroupOptions, IDockviewPanel, Parameters } from 'dockview-core';
+import { AddPanelOptions, AddPanelPositionOptions, Direction, DockviewGroupPanel, FloatingGroupOptions, IDockviewPanel, Parameters } from 'dockview-core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { DockviewComponent } from './dockview.component';
 
@@ -13,13 +13,19 @@ export class DockviewPanelDirective implements OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly id = input<string>();
-  readonly component = input<string>();
+  readonly view = input<string>();
   readonly title = input<string>();
 
   readonly floating = input<FloatingGroupOptions | boolean>(false);
-  readonly position = input<AddPanelPositionOptions>();
+  readonly direction = input<Direction>();
+  readonly referencePanel = input<string | IDockviewPanel>();
+  readonly referenceGroup = input<string | DockviewGroupPanel>();
+  readonly index = input<number>();
   readonly isOpen = model<boolean>(true);
   readonly params = input<Parameters>({});
+  readonly initOptions = input<Partial<AddPanelOptions<any>>>({});
+  readonly width = input<number>();
+  readonly height = input<number>();
 
   constructor(private dockview: DockviewComponent) {
     afterNextRender(() => {
@@ -32,35 +38,44 @@ export class DockviewPanelDirective implements OnDestroy {
             this.isOpen.set(false);
           }
         });
-
-      explicitEffect([this.isOpen, this.component], ([isOpen, component]) => {
-        if (!component) {
+        
+      explicitEffect([this.isOpen, this.view], ([isOpen, view]) => {
+        if (!view) {
           return;
         }
   
         if (isOpen) {
           if (!this.panel) {
-            const common = {
+            const common: Partial<AddPanelOptions<any>> = {
               id: this.id()!,
-              component: this.component()!,
+              component: this.view()!,
               title: this.title(),
-              params: this.params()
+              params: this.params(),
+              initialHeight: this.height(),
+              initialWidth: this.width()
             };
             
             if (this.floating()) {
               this.panel = this.dockview.api?.addPanel({
-                ...common,
-                floating: this.floating()
+                ...common as Omit<AddPanelOptions<any>, 'floating' | 'position'>,
+                floating: this.floating(),
+                ...this.initOptions() as Omit<AddPanelOptions<any>, 'floating' | 'position'>
               });
             } else {
               this.panel = this.dockview.api?.addPanel({
-                ...common,
-                position: this.position()
+                ...common as Omit<AddPanelOptions<any>, 'floating' | 'position'>,
+                position: {
+                  direction: this.direction(),
+                  referencePanel: this.referencePanel(),
+                  referenceGroup: this.referenceGroup(),
+                  index: this.index()
+                } as AddPanelPositionOptions,
+                ...this.initOptions() as Omit<AddPanelOptions<any>, 'floating' | 'position'>
               });
             }
           }
         } else if (this.panel) {
-          this.panel.api.close();
+          this.dockview.  .removePanel(this.panel, { dispose: true });
         }
       }, { injector: this.injector as any });
   
@@ -73,8 +88,13 @@ export class DockviewPanelDirective implements OnDestroy {
           this.panel?.api.updateParameters(params);
         }
       }, { injector: this.injector as any });
-    })
     
+      explicitEffect([this.width, this.height], ([width, height]) => {
+        if (width || height) {
+          this.panel?.api.setSize({ width: width || undefined, height: height || undefined });
+        }
+      }, { injector: this.injector as any });
+    })
   }
 
   ngOnDestroy() {

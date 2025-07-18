@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DockviewComponent, DockviewPanelDirective, DockviewPanelViewType, DockviewViewTemplateDirective } from 'dockview-angular-x';
+import { DockviewComponent, DockviewGroupDirective, DockviewPanelDirective, DockviewPanelViewType, DockviewViewTemplateDirective } from 'dockview-angular-x';
 import { DockviewComponentOptions, themeLight } from 'dockview-core';
 import { interval } from 'rxjs';
 
@@ -12,7 +12,7 @@ import { interval } from 'rxjs';
     <p>Time: {{params()?.time | date:'mediumTime'}}</p>
   `,
   imports: [DatePipe],
-  //changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ThreeComponent {
   readonly params = input<{ time: number }>();
@@ -43,24 +43,33 @@ export class FourComponent {
     <dv-dockview style="height: 1000px; width: 100%;"
       [options]="dockviewOptions"
       [viewTypes]="viewTypes">
+      <dv-group id="left" [direction]="'left'" [locked]="true">
+      </dv-group>
+
+      <dv-group id="right" [direction]="'right'">
+      </dv-group>
+
+      <dv-group id="bottom" [direction]="'below'" [height]="100">
+      </dv-group>
+
       <dv-panel id="one" [view]="'one'" [title]="'One'" [(isOpen)]="isOneOpen"
-        >
+        [referenceGroup]="'left'" [params]="params()">
       </dv-panel>
 
       <dv-panel id="two" [view]="'two'" [title]="'Two'" [(isOpen)]="isTwoOpen"
-        [position]="{ direction: 'right' }">
+        [referenceGroup]="'right'">
       </dv-panel>
 
       @for (three of threes(); track three.id) {
         <dv-panel [id]="three.id" [view]="'three'" [title]="'Three'"
-          [position]="{ direction: 'right' }"
+          [referenceGroup]="'bottom'"
           [params]="params()">
         </dv-panel>
       }
 
       @for (four of fours(); track four.id) {
         <dv-panel [id]="four.id" [view]="'four'" [title]="'Four'"
-          [position]="{ direction: 'right' }"
+          [referenceGroup]="'right'" [direction]="'right'"
           [params]="params()">
         </dv-panel>
       }
@@ -84,6 +93,7 @@ export class FourComponent {
   `,
   imports: [
     DockviewComponent,
+    DockviewGroupDirective,
     DockviewPanelDirective,
     DockviewViewTemplateDirective,
     DatePipe
