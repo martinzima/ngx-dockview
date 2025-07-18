@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, contentChildren, DestroyRef, ElementRef, EnvironmentInjector, inject, Injector, input, output, TemplateRef, Type, viewChild } from '@angular/core';
-import { CreateComponentOptions, createDockview, DockviewApi, DockviewComponentOptions, DockviewGroupPanel, IContentRenderer, IDockviewPanel, Parameters } from 'dockview-core';
+import { AfterViewInit, ApplicationRef, ChangeDetectionStrategy, Component, contentChildren, DestroyRef, ElementRef, EnvironmentInjector, inject, Injector, input, output, TemplateRef, Type, viewChild } from '@angular/core';
+import { CreateComponentOptions, createDockview, DockviewApi, DockviewComponentOptions, DockviewGroupPanel, DockviewReadyEvent, IContentRenderer, IDockviewPanel, Parameters } from 'dockview-core';
 import { ComponentPanelRenderer } from './component-panel-renderer';
 import { DockviewViewTemplateDirective } from './dockview-view-template.directive';
 import { TemplatePanelRenderer } from './template-panel-renderer';
@@ -29,7 +29,8 @@ export type DockviewPanelViewType = DockviewComponentPanelViewType<unknown> | Do
         display: block;
       }
     `
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DockviewComponent implements AfterViewInit {
   private _api?: DockviewApi;
@@ -38,6 +39,7 @@ export class DockviewComponent implements AfterViewInit {
 
   private readonly injector = inject(Injector);
   private readonly environmentInjector = inject(EnvironmentInjector);
+  private readonly applicationRef = inject(ApplicationRef);
   private readonly dockview = viewChild<ElementRef<HTMLDivElement>>('dockview');
   private readonly viewTemplates = contentChildren(DockviewViewTemplateDirective);
 
@@ -47,6 +49,7 @@ export class DockviewComponent implements AfterViewInit {
 
   readonly didRemoveGroup = output<DockviewGroupPanel>();
   readonly didRemovePanel = output<IDockviewPanel>();
+  readonly ready = output<DockviewReadyEvent>();
 
   get api(): DockviewApi | undefined {
     return this._api;
@@ -62,8 +65,10 @@ export class DockviewComponent implements AfterViewInit {
   ngAfterViewInit() {
     this._api = createDockview(this.dockview()!.nativeElement, {
       createComponent: this.createComponent,
-      ...this.options(),
+      ...this.options()
     });
+
+    this.ready.emit({ api: this._api });
 
     this.disposables.push(this._api.onDidRemoveGroup(e => this.didRemoveGroup.emit(e)));
     this.disposables.push(this._api.onDidRemovePanel(e => this.didRemovePanel.emit(e)));
@@ -73,9 +78,9 @@ export class DockviewComponent implements AfterViewInit {
     const viewType = this.getPanelViewType(options.name);
     if (viewType) {
       if ('template' in viewType) {
-        return new TemplatePanelRenderer(viewType.template, this.injector);
+        return new TemplatePanelRenderer(viewType.template, this.injector, this.applicationRef);
       } else {
-        return new ComponentPanelRenderer(viewType.component, this.injector, this.environmentInjector);
+        return new ComponentPanelRenderer(viewType.component, this.injector, this.environmentInjector, this.applicationRef);
       }
     }
 

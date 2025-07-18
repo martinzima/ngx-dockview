@@ -1,4 +1,4 @@
-import { ComponentRef, EnvironmentInjector, Injector, Type, createComponent, inputBinding, signal } from '@angular/core';
+import { ApplicationRef, ComponentRef, EnvironmentInjector, Injector, Type, createComponent, inputBinding, reflectComponentType, signal } from '@angular/core';
 import { GroupPanelPartInitParameters, IContentRenderer, PanelUpdateEvent, Parameters } from 'dockview-core';
 
 export class ComponentPanelRenderer<T> implements IContentRenderer {
@@ -12,19 +12,31 @@ export class ComponentPanelRenderer<T> implements IContentRenderer {
   constructor(
     private componentType: Type<T>,
     private injector: Injector,
-    private environmentInjector: EnvironmentInjector
+    private environmentInjector: EnvironmentInjector,
+    private applicationRef: ApplicationRef
   ) {}
 
   init(parameters: GroupPanelPartInitParameters): void {
     const hostElement = document.createElement('div');
+    hostElement.style.display = 'contents';
+
+    const bindings = [];
+
+    this.params.set(parameters.params);
+
+    if (parameters.params
+      && reflectComponentType(this.componentType)?.inputs?.some(input => input.propName === 'params')) {
+      bindings.push(inputBinding('params', () => this.params()));
+    }
+
     this.componentRef = createComponent(this.componentType, {
       elementInjector: this.injector,
       hostElement,
       environmentInjector: this.environmentInjector,
-      bindings: [
-        inputBinding('params', () => this.params())
-      ]
+      bindings
     });
+    
+    this.applicationRef.attachView(this.componentRef.hostView);
     this.componentRef.changeDetectorRef.detectChanges();
   }
 

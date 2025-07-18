@@ -1,4 +1,4 @@
-import { EmbeddedViewRef, Injector, TemplateRef } from '@angular/core';
+import { ApplicationRef, EmbeddedViewRef, Injector, TemplateRef } from '@angular/core';
 import { GroupPanelPartInitParameters, IContentRenderer, PanelUpdateEvent, Parameters } from 'dockview-core';
 
 export class TemplatePanelRenderer<C extends { $implicit: Parameters }> implements IContentRenderer {
@@ -11,11 +11,13 @@ export class TemplatePanelRenderer<C extends { $implicit: Parameters }> implemen
 
   constructor(
     private template: TemplateRef<C>,
-    private injector: Injector
+    private injector: Injector,
+    private applicationRef: ApplicationRef
   ) {}
 
   init(parameters: GroupPanelPartInitParameters): void {
     this.hostElement = document.createElement('div');
+    this.hostElement.style.display = 'contents';
     
     this.embeddedViewRef = this.template.createEmbeddedView({
       $implicit: parameters.params
@@ -25,6 +27,7 @@ export class TemplatePanelRenderer<C extends { $implicit: Parameters }> implemen
       this.hostElement?.appendChild(node);
     }
     
+    this.applicationRef.attachView(this.embeddedViewRef);
     this.embeddedViewRef.detectChanges();
   }
 
