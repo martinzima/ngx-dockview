@@ -65,6 +65,8 @@ export class DockviewComponent implements DockviewInterface, AfterViewInit {
   readonly didActiveGroupChange = output<DockviewGroupPanel | undefined>();
   readonly didActivePanelChange = output<IDockviewPanel | undefined>();
   readonly didMovePanel = output<MovePanelEvent>();
+  readonly didLayoutChange = output<void>();
+  readonly didLayoutFromJSON = output<void>();
   readonly unhandledDragOverEvent = output<DockviewDndOverlayEvent>();
   readonly ready = output<DockviewReadyEvent>();
 
@@ -104,6 +106,8 @@ export class DockviewComponent implements DockviewInterface, AfterViewInit {
     this.disposables.push(this.api!.onDidActivePanelChange(e => this.didActivePanelChange.emit(e)));
     this.disposables.push(this.api!.onDidMovePanel(e => this.didMovePanel.emit(e)));
     this.disposables.push(this.api!.onUnhandledDragOverEvent(e => this.unhandledDragOverEvent.emit(e)));
+    this.disposables.push(this.api!.onDidLayoutChange(e => this.didLayoutChange.emit(e)));
+    this.disposables.push(this.api!.onDidLayoutFromJSON(e => this.didLayoutFromJSON.emit(e)));
   }
 
   private createComponent = (options: CreateComponentOptions): IContentRenderer => {

@@ -1,59 +1,41 @@
 # dockview-angular-x
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.2.
+Dockview bindings for Angular (unofficial). Dockview is a zero dependency Docking Layout Manager for the web, written in TypeScript.
 
-## Development server
-
-To start a local development server, run:
+## Installation
 
 ```bash
-ng serve
+npm install dockview-angular-x dockview-core
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Usage
 
-## Code scaffolding
+```typescript
+import { DockviewComponent, DockviewPanelDirective, DockviewPanelTemplateDirective } from 'dockview-angular-x';
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+@Component({
+  selector: 'app-root',
+  template: `
+    <dv-dockview style="height: 100%; width: 100%; display: block;"
+      (ready)="onReady($event)">
+      <!-- declarative approach -->
+      <ng-template [dvPanelTemplate]="'one'" let-params>
+        <h1>One</h1>
+      </ng-template>
 
-```bash
-ng generate component component-name
+      <dv-panel id="one" [view]="'one'" [title]="'One'">
+      </dv-panel>
+    </dv-dockview>
+  `,
+  imports: [DockviewComponent, DockviewPanelTemplateDirective, DockviewPanelDirective]
+})
+export class AppComponent {
+  onReady(event: DockviewReadyEvent) {
+    // use event.api for imperative approach
+  }
+}
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## License
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+MIT
