@@ -1,14 +1,14 @@
 import { ApplicationRef, EmbeddedViewRef, Injector, TemplateRef } from '@angular/core';
-import { DockviewApi, DockviewPanelApi, IDockviewPanelHeaderProps, ITabRenderer, PanelUpdateEvent, Parameters } from 'dockview-core';
+import { DockviewApi, DockviewGroupPanelApi, IDockviewGroupPanel, IGroupHeaderProps, IHeaderActionsRenderer } from 'dockview-core';
 
-export interface TemplateTabParams {
-  $implicit: Parameters;
-  api: DockviewPanelApi;
+export type TemplateHeaderActionsRendererProps = {
+  group: IDockviewGroupPanel;
+  api: DockviewGroupPanelApi;
   containerApi: DockviewApi;
-}
+};
 
-export class TemplateTabRenderer<C extends TemplateTabParams>
-  implements ITabRenderer {
+export class TemplateHeaderActionsRenderer<C extends TemplateHeaderActionsRendererProps>
+  implements IHeaderActionsRenderer {
   private hostElement?: HTMLElement;
   private embeddedViewRef?: EmbeddedViewRef<C>;
 
@@ -23,12 +23,12 @@ export class TemplateTabRenderer<C extends TemplateTabParams>
     return this.hostElement!;
   }
 
-  init(props: IDockviewPanelHeaderProps): void {
+  init(props: IGroupHeaderProps): void {
     this.hostElement = document.createElement('div');
     this.hostElement.style.display = 'contents';
 
     this.embeddedViewRef = this.templateRef.createEmbeddedView({
-      $implicit: props.params,
+      group: props.group,
       api: props.api,
       containerApi: props.containerApi
     } as C, this.injector);
@@ -39,13 +39,6 @@ export class TemplateTabRenderer<C extends TemplateTabParams>
     
     this.applicationRef.attachView(this.embeddedViewRef);
     this.embeddedViewRef.detectChanges();
-  }
-
-  update(event: PanelUpdateEvent<Parameters>): void {
-    if (this.embeddedViewRef) {
-      this.embeddedViewRef.context.$implicit = event.params;
-      this.embeddedViewRef.detectChanges();
-    }
   }
 
   dispose(): void {

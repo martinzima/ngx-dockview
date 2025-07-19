@@ -1,13 +1,15 @@
 import { AfterViewInit, ApplicationRef, ChangeDetectionStrategy, Component, contentChildren, DestroyRef, ElementRef, EnvironmentInjector, forwardRef, inject, Injector, input, output, TemplateRef, Type, viewChild } from '@angular/core';
-import { CreateComponentOptions, createDockview, DockviewApi, DockviewComponentOptions, DockviewDndOverlayEvent, DockviewGroupPanel, DockviewReadyEvent, IContentRenderer, IDockviewPanel, ITabRenderer, MovePanelEvent, Parameters } from 'dockview-core';
+import { CreateComponentOptions, createDockview, DockviewApi, DockviewComponentOptions, DockviewDndOverlayEvent, DockviewGroupPanel, DockviewReadyEvent, DockviewTheme, IContentRenderer, IDockviewPanel, IHeaderActionsRenderer, ITabRenderer, IWatermarkRenderer, MovePanelEvent, Parameters } from 'dockview-core';
 import { BehaviorSubject, filter, Observable } from 'rxjs';
 import { ComponentPanelRenderer } from './component-panel-renderer';
 import { ComponentTabRenderer } from './component-tab-renderer';
 import { DOCKVIEW_INTERFACE, DockviewInterface } from './dockview-interface';
 import { DockviewPanelTemplateDirective } from './panel-template.directive';
 import { DockviewTabTemplateDirective } from './tab-template.directive';
+import { TemplateHeaderActionsRenderer, TemplateHeaderActionsRendererProps } from './template-header-actions-renderer';
 import { TemplatePanelRenderer } from './template-panel-renderer';
 import { TemplateTabRenderer } from './template-tab-renderer';
+import { TemplateWatermarkRenderer, TemplateWatermarkRendererProps } from './template-watermark-renderer';
 
 // dockview-core does not export IDisposable
 interface IDisposable {
@@ -59,6 +61,11 @@ export class DockviewComponent implements DockviewInterface, AfterViewInit {
   readonly tabComponentTypes = input<Record<string, DockviewPanelViewType>>();
   readonly options = input<Partial<DockviewComponentOptions>>();
   readonly defaultTabComponent = input<Type<any>>();
+  readonly leftHeaderActionsTemplate = input<TemplateRef<TemplateHeaderActionsRendererProps>>();
+  readonly rightHeaderActionsTemplate = input<TemplateRef<TemplateHeaderActionsRendererProps>>();
+  readonly prefixHeaderActionsTemplate = input<TemplateRef<TemplateHeaderActionsRendererProps>>();
+  readonly theme = input<DockviewTheme>();
+  readonly watermarkTemplate = input<TemplateRef<TemplateWatermarkRendererProps>>();
 
   readonly didRemoveGroup = output<DockviewGroupPanel>();
   readonly didRemovePanel = output<IDockviewPanel>();
@@ -89,6 +96,11 @@ export class DockviewComponent implements DockviewInterface, AfterViewInit {
     const api = createDockview(this.dockviewElement()!.nativeElement, {
       createComponent: this.createComponent,
       createTabComponent: this.createTabComponent,
+      createLeftHeaderActionComponent: this.leftHeaderActionsTemplate() ? this.createLeftHeaderActionComponent : undefined,
+      createRightHeaderActionComponent: this.rightHeaderActionsTemplate() ? this.createRightHeaderActionComponent : undefined,
+      createPrefixHeaderActionComponent: this.prefixHeaderActionsTemplate() ? this.createPrefixHeaderActionComponent : undefined,
+      createWatermarkComponent: this.watermarkTemplate() ? this.createWatermarkComponent : undefined,
+      theme: this.theme(),
       ...this.options()
     });
 
@@ -135,6 +147,38 @@ export class DockviewComponent implements DockviewInterface, AfterViewInit {
 
     return undefined;
   };
+
+  private createLeftHeaderActionComponent = (group: DockviewGroupPanel): IHeaderActionsRenderer => {
+    if (this.leftHeaderActionsTemplate()) {
+      return new TemplateHeaderActionsRenderer(this.leftHeaderActionsTemplate()!, this.injector, this.applicationRef);
+    }
+    
+    throw new Error('No left header actions template provided');
+  };
+
+  private createRightHeaderActionComponent = (group: DockviewGroupPanel): IHeaderActionsRenderer => {
+    if (this.rightHeaderActionsTemplate()) {
+      return new TemplateHeaderActionsRenderer(this.rightHeaderActionsTemplate()!, this.injector, this.applicationRef);
+    }
+    
+    throw new Error('No right header actions template provided');
+  };
+
+  private createPrefixHeaderActionComponent = (group: DockviewGroupPanel): IHeaderActionsRenderer => {
+    if (this.prefixHeaderActionsTemplate()) {
+      return new TemplateHeaderActionsRenderer(this.prefixHeaderActionsTemplate()!, this.injector, this.applicationRef);
+    }
+    
+    throw new Error('No prefix header actions template provided');
+  };
+
+  private createWatermarkComponent = (): IWatermarkRenderer => {
+    if (this.watermarkTemplate()) {
+      return new TemplateWatermarkRenderer(this.watermarkTemplate()!, this.injector, this.applicationRef);
+    }
+    
+    throw new Error('No watermark template provided');
+  };  
 
   private getPanelViewType(name: string): DockviewPanelViewType {
     const template = this.panelTemplates().find((template) => template.name() === name);

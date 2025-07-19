@@ -1,7 +1,13 @@
 import { ApplicationRef, EmbeddedViewRef, Injector, TemplateRef } from '@angular/core';
 import { DockviewApi, DockviewPanelApi, GroupPanelPartInitParameters, IContentRenderer, PanelUpdateEvent, Parameters } from 'dockview-core';
 
-export class TemplatePanelRenderer<C extends { $implicit: Parameters, api: DockviewPanelApi, containerApi: DockviewApi }> implements IContentRenderer {
+export interface TemplatePanelParams {
+  $implicit: Parameters;
+  api: DockviewPanelApi;
+  containerApi: DockviewApi;
+}
+
+export class TemplatePanelRenderer<C extends TemplatePanelParams> implements IContentRenderer {
   private hostElement?: HTMLElement;
   private embeddedViewRef?: EmbeddedViewRef<C>;
 

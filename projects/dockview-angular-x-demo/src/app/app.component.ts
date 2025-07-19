@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DockviewComponent, DockviewDefaultTabComponent, DockviewGroupDirective, DockviewPanelDirective, DockviewPanelTemplateDirective, DockviewPanelViewType, DockviewTabTemplateDirective } from 'dockview-angular-x';
-import { DockviewComponentOptions, DockviewPanelApi, themeLight } from 'dockview-core';
+import { DockviewPanelApi, themeLight } from 'dockview-core';
 import { interval } from 'rxjs';
 
 @Component({
@@ -37,15 +37,29 @@ export class FourComponent {
   template: `
     <h1>dockview-angular-x demo</h1>
 
-    <button (click)="isOneOpen.set(!isOneOpen())">Toggle One</button>
-    <button (click)="isTwoOpen.set(!isTwoOpen())">Toggle Two</button>
-    <button (click)="addThree()">Add Three</button>
-    <button (click)="addFour()">Add Four</button>
+    <div style="margin-bottom: 16px;">
+      <button (click)="isOneOpen.set(!isOneOpen())">Toggle One</button>
+      <button (click)="isTwoOpen.set(!isTwoOpen())">Toggle Two</button>
+      <button (click)="addThree()">Add Three</button>
+      <button (click)="addFour()">Add Four</button>
+    </div>
 
-    <dv-dockview style="height: 1000px; width: 100%;"
-      [options]="dockviewOptions"
+    <dv-dockview style="flex-grow: 1; width: 100%;"
+      [theme]="themeLight"
       [viewTypes]="viewTypes"
-      [tabComponentTypes]="tabComponentTypes">
+      [tabComponentTypes]="tabComponentTypes"
+      [prefixHeaderActionsTemplate]="prefixHeaderActionsTemplate"
+      [watermarkTemplate]="watermarkTemplate">
+      <ng-template #prefixHeaderActionsTemplate>
+        <div style="line-height: 35px; padding: 0 8px;">LOGO</div>
+      </ng-template>
+
+      <ng-template #watermarkTemplate>
+        <div style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: gray;">
+          Empty state
+        </div>
+      </ng-template>
+
       <dv-group id="left" [direction]="'left'">
       </dv-group>
 
@@ -54,6 +68,20 @@ export class FourComponent {
 
       <dv-group id="bottom" [direction]="'below'" [height]="200">
       </dv-group>
+
+      <ng-template [dvPanelTemplate]="'one'" let-params>
+        <h1>One</h1>
+        <p>Time: {{params.time | date:'mediumTime'}}</p>
+      </ng-template>
+
+      <ng-template [dvPanelTemplate]="'two'" let-api="api">
+        <h1>Two</h1>
+        <button type="button" (click)="api?.close()">Close</button>
+      </ng-template>
+
+      <ng-template [dvTabTemplate]="'customTab1'" let-params let-api="api" let-title="title">
+        <dv-default-tab [api]="api" [title]="title" [hideClose]="true" />
+      </ng-template>
 
       <dv-panel id="one" [view]="'one'" [title]="'One'" [(isOpen)]="isOneOpen"
         [referenceGroup]="'left'" [params]="params()" [tabComponent]="'default'" [width]="200">
@@ -77,27 +105,14 @@ export class FourComponent {
           [params]="params()">
         </dv-panel>
       }
-
-      <ng-template [dvPanelTemplate]="'one'" let-params>
-        <h1>One</h1>
-        <p>Time: {{params.time | date:'mediumTime'}}</p>
-      </ng-template>
-
-      <ng-template [dvPanelTemplate]="'two'" let-api="api">
-        <h1>Two</h1>
-        <button type="button" (click)="api?.close()">Close</button>
-      </ng-template>
-
-      <ng-template [dvTabTemplate]="'customTab1'" let-params let-api="api" let-title="title">
-        <dv-default-tab [api]="api" [title]="title" [hideClose]="true" />
-      </ng-template>
     </dv-dockview>
   `,
   styles: `
     :host {
       height: 100%;
       width: 100%;
-      display: block;
+      display: flex;
+      flex-direction: column;
     }
   `,
   imports: [
@@ -126,9 +141,7 @@ export class AppComponent {
       });
   }
 
-  readonly dockviewOptions: Partial<DockviewComponentOptions> = {
-    theme: themeLight
-  };
+  readonly themeLight = themeLight;
 
   readonly viewTypes: Record<string, DockviewPanelViewType> = {
     three: {
