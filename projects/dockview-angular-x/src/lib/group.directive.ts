@@ -1,4 +1,4 @@
-import { DestroyRef, Directive, inject, Injector, input, model, OnDestroy } from '@angular/core';
+import { DestroyRef, Directive, inject, Injector, input, model, OnDestroy, signal } from '@angular/core';
 import { outputToObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AddGroupOptions, Direction, DockviewGroupPanel, IDockviewGroupPanel, IDockviewPanel } from 'dockview-core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -24,7 +24,7 @@ export type AddGroupPositionOptions = AddGroupOptionsWithGroup | AddGroupOptions
   selector: 'dv-group'
 })
 export class DockviewGroupDirective implements OnDestroy {
-  private group: IDockviewGroupPanel | undefined;
+  private group = signal<IDockviewGroupPanel | undefined>(undefined);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dockviewInterface = inject(DOCKVIEW_INTERFACE);
@@ -47,7 +47,7 @@ export class DockviewGroupDirective implements OnDestroy {
         takeUntilDestroyed(this.destroyRef))
       .subscribe(group => {
         if (group.id === this.id()) {
-          this.group = group;
+          this.group.set(group);
           this.isOpen.set(true);
         }
       });
@@ -57,7 +57,7 @@ export class DockviewGroupDirective implements OnDestroy {
         takeUntilDestroyed(this.destroyRef))
       .subscribe(panel => {
         if (panel.id === this.id()) {
-          this.group = undefined;
+          this.group.set(undefined);
           this.isOpen.set(false);
         }
       });
@@ -65,8 +65,8 @@ export class DockviewGroupDirective implements OnDestroy {
     outputToObservable(this.dockviewInterface.didActiveGroupChange)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(group => {
-        if (this.group?.api.isActive !== this.isActive()) {
-          this.isActive.set(this.group?.api.isActive || false);
+        if (this.group() && this.group()!.api.isActive !== this.isActive()) {
+          this.isActive.set(this.group()!.api.isActive);
         }
       });
 
@@ -75,7 +75,7 @@ export class DockviewGroupDirective implements OnDestroy {
       .subscribe(api => {
         explicitEffect([this.isOpen], ([isOpen]) => {
           if (isOpen) {
-            if (!this.group) {
+            if (!this.group()) {
               const common: Partial<AddGroupOptions> = {
                 id: this.id()!,
                 referencePanel: this.referencePanel(),
@@ -87,29 +87,29 @@ export class DockviewGroupDirective implements OnDestroy {
                 skipSetActive: !this.isActive()
               };
               
-              this.group = api?.addGroup({
+              this.group.set(api?.addGroup({
                 ...common,
                 ...this.initOptions() as AddGroupOptions
-              });
+              }));
             }
-          } else if (this.group) {
-            this.group.api.close();
+          } else if (this.group()) {
+            this.group()!.api.close();
           }
         }, { injector: this.injector as any });
 
         explicitEffect([this.isVisible], ([isVisible]) => {
-          this.group?.api.setVisible(isVisible);
+          this.group()?.api.setVisible(isVisible);
         }, { injector: this.injector as any });
 
         explicitEffect([this.width, this.height], ([width, height]) => {
           if (width || height) {
-            this.group?.api.setSize({ width: width || undefined, height: height || undefined });
+            this.group()?.api.setSize({ width: width || undefined, height: height || undefined });
           }
         }, { injector: this.injector as any });
       });
   }
 
   ngOnDestroy() {
-    this.group?.api.close();
+    this.group()?.api.close();
   }
 }
