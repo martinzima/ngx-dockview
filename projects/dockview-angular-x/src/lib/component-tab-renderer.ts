@@ -1,46 +1,70 @@
-import { ApplicationRef, createComponent, EnvironmentInjector, Injector, Type, ViewRef } from '@angular/core';
-import { DockviewPanelApi, IDockviewPanelHeaderProps, ITabRenderer } from 'dockview-core';
+import { ApplicationRef, ComponentRef, createComponent, EnvironmentInjector, Injector, inputBinding, reflectComponentType, signal, Type } from '@angular/core';
+import { IDockviewPanelHeaderProps, ITabRenderer, PanelUpdateEvent, Parameters } from 'dockview-core';
 
 export class ComponentTabRenderer<T> implements ITabRenderer {
-  private _element: HTMLElement;
-  private viewRef?: ViewRef;
-
-  get element(): HTMLElement {
-    return this._element;
-  }
+  private readonly params = signal<Parameters>({});
+  
+  private componentRef?: ComponentRef<T>;
 
   constructor(
-    private readonly component: Type<T>,
-    private readonly injector: Injector,
-    private readonly environmentInjector: EnvironmentInjector
+    private readonly componentType: Type<T>,
+    private injector: Injector,
+    private environmentInjector: EnvironmentInjector,
+    private applicationRef: ApplicationRef
   ) {
-    this._element = document.createElement('div');
-    this._element.style.height = '100%';
-    this._element.style.width = '100%';
+  }
+
+  get element(): HTMLElement {
+    return this.componentRef!.location.nativeElement;
   }
 
   init(props: IDockviewPanelHeaderProps): void {
-    const componentRef = createComponent(this.component, {
-      environmentInjector: this.environmentInjector,
+    const hostElement = document.createElement('div');
+
+    this.componentRef = createComponent(this.componentType, {
       elementInjector: this.injector,
-      hostElement: this._element,
+      hostElement,
+      environmentInjector: this.environmentInjector
     });
 
-    const appRef = this.injector.get(ApplicationRef);
-    appRef.attachView(componentRef.hostView);
+    this.params.set(props.params);
+    
+    const bindings = [];
+    const inputNames: Partial<Record<(keyof typeof props), () => unknown>> = {
+      'params': () => this.params(),
+      'api': () => props.api,
+      'tabLocation': () => props.tabLocation,
+      'containerApi': () => props.containerApi
+    };
 
-    for (const key in props) {
-      componentRef.setInput(key, (props as any)[key]);
+    for (const inputName of Object.keys(inputNames)) {
+      if (props[inputName as keyof typeof props]
+        && reflectComponentType(this.componentType)?.inputs?.some(input => input.propName === inputName)) {
+        bindings.push(inputBinding(inputName, inputNames[inputName as keyof typeof inputNames]!));
+      }
     }
 
-    componentRef.changeDetectorRef.detectChanges();
+    this.componentRef = createComponent(this.componentType, {
+      elementInjector: this.injector,
+      hostElement,
+      environmentInjector: this.environmentInjector,
+      bindings
+    });
 
-    this.viewRef = componentRef.hostView;
+    this.applicationRef.attachView(this.componentRef.hostView);
+    this.componentRef.changeDetectorRef.detectChanges();
+  }
+
+  update(event: PanelUpdateEvent<Parameters>): void {
+    if (this.componentRef) {
+      this.params.set(event.params);
+      this.componentRef.changeDetectorRef.detectChanges();
+    }
   }
 
   dispose(): void {
-    if (this.viewRef) {
-      this.viewRef.destroy();
+    if (this.componentRef) {
+      this.componentRef.destroy();
     }
   }
 }

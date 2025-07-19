@@ -1,7 +1,8 @@
 import { ApplicationRef, EmbeddedViewRef, Injector, TemplateRef } from '@angular/core';
-import { DockviewApi, DockviewPanelApi, GroupPanelPartInitParameters, IContentRenderer, PanelUpdateEvent, Parameters } from 'dockview-core';
+import { DockviewApi, DockviewPanelApi, IDockviewPanelHeaderProps, ITabRenderer, PanelUpdateEvent, Parameters } from 'dockview-core';
 
-export class TemplatePanelRenderer<C extends { $implicit: Parameters, api: DockviewPanelApi, containerApi: DockviewApi }> implements IContentRenderer {
+export class TemplateTabRenderer<C extends { $implicit: Parameters, api: DockviewPanelApi, containerApi: DockviewApi }>
+  implements ITabRenderer {
   private hostElement?: HTMLElement;
   private embeddedViewRef?: EmbeddedViewRef<C>;
 
@@ -9,20 +10,21 @@ export class TemplatePanelRenderer<C extends { $implicit: Parameters, api: Dockv
     private templateRef: TemplateRef<C>,
     private injector: Injector,
     private applicationRef: ApplicationRef
-  ) {}
+  ) {
+  }
 
   get element(): HTMLElement {
     return this.hostElement!;
   }
 
-  init(parameters: GroupPanelPartInitParameters): void {
+  init(props: IDockviewPanelHeaderProps): void {
     this.hostElement = document.createElement('div');
     this.hostElement.style.display = 'contents';
-    
+
     this.embeddedViewRef = this.templateRef.createEmbeddedView({
-      $implicit: parameters.params,
-      api: parameters.api,
-      containerApi: parameters.containerApi
+      $implicit: props.params,
+      api: props.api,
+      containerApi: props.containerApi
     } as C, this.injector);
 
     for (const node of this.embeddedViewRef.rootNodes) {

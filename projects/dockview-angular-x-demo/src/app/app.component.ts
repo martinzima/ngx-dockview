@@ -1,8 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DockviewComponent, DockviewGroupDirective, DockviewPanelDirective, DockviewPanelViewType, DockviewViewTemplateDirective } from 'dockview-angular-x';
-import { DockviewComponentOptions, themeLight } from 'dockview-core';
+import { DockviewComponent, DockviewDefaultTabComponent, DockviewGroupDirective, DockviewPanelDirective, DockviewPanelTemplateDirective, DockviewPanelViewType, DockviewTabTemplateDirective } from 'dockview-angular-x';
+import { DockviewComponentOptions, DockviewPanelApi, themeLight } from 'dockview-core';
 import { interval } from 'rxjs';
 
 @Component({
@@ -23,11 +23,13 @@ export class ThreeComponent {
   template: `
     <h1>Four</h1>
     <button type="button" (click)="count.set(count() + 1)">Count: {{count()}}</button>
+    <button type="button" (click)="api()?.close()">Close</button>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FourComponent {
-  readonly count = signal(0);
+  readonly api = input<DockviewPanelApi>();
+  protected readonly count = signal(0);
 }
 
 @Component({
@@ -42,22 +44,23 @@ export class FourComponent {
 
     <dv-dockview style="height: 1000px; width: 100%;"
       [options]="dockviewOptions"
-      [viewTypes]="viewTypes">
-      <dv-group id="left" [direction]="'left'" [locked]="true">
+      [viewTypes]="viewTypes"
+      [tabComponentTypes]="tabComponentTypes">
+      <dv-group id="left" [direction]="'left'">
       </dv-group>
 
       <dv-group id="right" [direction]="'right'">
       </dv-group>
 
-      <dv-group id="bottom" [direction]="'below'" [height]="100">
+      <dv-group id="bottom" [direction]="'below'" [height]="200">
       </dv-group>
 
       <dv-panel id="one" [view]="'one'" [title]="'One'" [(isOpen)]="isOneOpen"
-        [referenceGroup]="'left'" [params]="params()">
+        [referenceGroup]="'left'" [params]="params()" [tabComponent]="'default'" [width]="200">
       </dv-panel>
 
       <dv-panel id="two" [view]="'two'" [title]="'Two'" [(isOpen)]="isTwoOpen"
-        [referenceGroup]="'right'">
+        [referenceGroup]="'right'" [tabComponent]="'customTab1'">
       </dv-panel>
 
       @for (three of threes(); track three.id) {
@@ -70,17 +73,23 @@ export class FourComponent {
       @for (four of fours(); track four.id) {
         <dv-panel [id]="four.id" [view]="'four'" [title]="'Four'"
           [referenceGroup]="'right'" [direction]="'right'"
+          [width]="200"
           [params]="params()">
         </dv-panel>
       }
 
-      <ng-template [dvViewTemplate]="'one'" let-params>
+      <ng-template [dvPanelTemplate]="'one'" let-params>
         <h1>One</h1>
         <p>Time: {{params.time | date:'mediumTime'}}</p>
       </ng-template>
 
-      <ng-template [dvViewTemplate]="'two'">
+      <ng-template [dvPanelTemplate]="'two'" let-api="api">
         <h1>Two</h1>
+        <button type="button" (click)="api?.close()">Close</button>
+      </ng-template>
+
+      <ng-template [dvTabTemplate]="'customTab1'" let-params let-api="api" let-title="title">
+        <dv-default-tab [api]="api" [title]="title" [hideClose]="true" />
       </ng-template>
     </dv-dockview>
   `,
@@ -95,14 +104,16 @@ export class FourComponent {
     DockviewComponent,
     DockviewGroupDirective,
     DockviewPanelDirective,
-    DockviewViewTemplateDirective,
-    DatePipe
-  ],
+    DockviewPanelTemplateDirective,
+    DockviewTabTemplateDirective,
+    DatePipe,
+    DockviewDefaultTabComponent
+],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
-  readonly isOneOpen = signal<boolean>(false);
-  readonly isTwoOpen = signal<boolean>(false);
+  readonly isOneOpen = signal<boolean>(true);
+  readonly isTwoOpen = signal<boolean>(true);
   readonly threes = signal<{ id: string, params: { count: number } }[]>([]);
   readonly fours = signal<{ id: string, params: {} }[]>([]);
   readonly time = signal<number>(Date.now());
@@ -125,6 +136,12 @@ export class AppComponent {
     },
     four: {
       component: FourComponent
+    }
+  };
+
+  readonly tabComponentTypes: Record<string, DockviewPanelViewType> = {
+    default: {
+      component: DockviewDefaultTabComponent
     }
   };
 

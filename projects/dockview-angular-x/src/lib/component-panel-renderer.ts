@@ -5,10 +5,6 @@ export class ComponentPanelRenderer<T> implements IContentRenderer {
   private readonly params = signal<Parameters>({});
   private componentRef?: ComponentRef<T>;
 
-  get element(): HTMLElement {
-    return this.componentRef!.location.nativeElement;
-  }
-
   constructor(
     private componentType: Type<T>,
     private injector: Injector,
@@ -16,17 +12,28 @@ export class ComponentPanelRenderer<T> implements IContentRenderer {
     private applicationRef: ApplicationRef
   ) {}
 
+  get element(): HTMLElement {
+    return this.componentRef!.location.nativeElement;
+  }
+
   init(parameters: GroupPanelPartInitParameters): void {
     const hostElement = document.createElement('div');
     hostElement.style.display = 'contents';
 
-    const bindings = [];
-
     this.params.set(parameters.params);
 
-    if (parameters.params
-      && reflectComponentType(this.componentType)?.inputs?.some(input => input.propName === 'params')) {
-      bindings.push(inputBinding('params', () => this.params()));
+    const bindings = [];
+    const inputNames: Partial<Record<(keyof typeof parameters), () => unknown>> = {
+      'params': () => this.params(),
+      'api': () => parameters.api,
+      'containerApi': () => parameters.containerApi
+    };
+
+    for (const inputName of Object.keys(inputNames)) {
+      if (parameters[inputName as keyof typeof parameters]
+        && reflectComponentType(this.componentType)?.inputs?.some(input => input.propName === inputName)) {
+        bindings.push(inputBinding(inputName, inputNames[inputName as keyof typeof inputNames]!));
+      }
     }
 
     this.componentRef = createComponent(this.componentType, {
@@ -44,6 +51,12 @@ export class ComponentPanelRenderer<T> implements IContentRenderer {
     if (this.componentRef) {
       this.params.set(event.params);
       this.componentRef.changeDetectorRef.detectChanges();
+    }
+  }
+
+  dispose(): void {
+    if (this.componentRef) {
+      this.componentRef.destroy();
     }
   }
 }
