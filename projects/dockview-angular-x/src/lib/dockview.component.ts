@@ -67,6 +67,8 @@ export class DockviewComponent implements DockviewInterface, AfterViewInit {
   readonly theme = input<DockviewTheme>();
   readonly watermarkTemplate = input<TemplateRef<TemplateWatermarkRendererProps>>();
 
+  readonly didAddGroup = output<DockviewGroupPanel>();
+  readonly didAddPanel = output<IDockviewPanel>();
   readonly didRemoveGroup = output<DockviewGroupPanel>();
   readonly didRemovePanel = output<IDockviewPanel>();
   readonly didActiveGroupChange = output<DockviewGroupPanel | undefined>();
@@ -112,6 +114,8 @@ export class DockviewComponent implements DockviewInterface, AfterViewInit {
 
     this.ready.emit({ api: this.api! });
 
+    this.disposables.push(this.api!.onDidAddGroup(e => this.didAddGroup.emit(e)));
+    this.disposables.push(this.api!.onDidAddPanel(e => this.didAddPanel.emit(e)));
     this.disposables.push(this.api!.onDidRemoveGroup(e => this.didRemoveGroup.emit(e)));
     this.disposables.push(this.api!.onDidRemovePanel(e => this.didRemovePanel.emit(e)));
     this.disposables.push(this.api!.onDidActiveGroupChange(e => this.didActiveGroupChange.emit(e)));

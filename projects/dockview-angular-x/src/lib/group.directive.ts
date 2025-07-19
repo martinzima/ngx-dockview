@@ -42,6 +42,16 @@ export class DockviewGroupDirective implements OnDestroy {
   readonly height = input<number>();
 
   constructor() {
+    outputToObservable(this.dockviewInterface.didAddGroup)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef))
+      .subscribe(group => {
+        if (group.id === this.id()) {
+          this.group = group;
+          this.isOpen.set(true);
+        }
+      });
+
     outputToObservable(this.dockviewInterface.didRemovePanel)
       .pipe(
         takeUntilDestroyed(this.destroyRef))

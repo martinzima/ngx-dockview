@@ -33,10 +33,19 @@ export class DockviewPanelDirective implements OnDestroy {
   readonly tabComponent = input<string>();
 
   constructor() {
+    outputToObservable(this.dockviewInterface.didActivePanelChange)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(panel => {
+        if (panel?.id === this.id() && !this.isOpen()) {
+          this.panel = panel;
+          this.isOpen.set(true);
+        }
+      });
+
     outputToObservable(this.dockviewInterface.didRemovePanel)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(panel => {
-        if (panel.id === this.id()) {
+        if (panel.id === this.id() && this.isOpen()) {
           this.panel = undefined;
           this.isOpen.set(false);
         }
@@ -70,7 +79,6 @@ export class DockviewPanelDirective implements OnDestroy {
                 tabComponent: this.tabComponent(),
                 inactive: !this.isActive()
               };
-              console.log(this.isActive())
               
               if (this.floating()) {
                 this.panel = api?.addPanel({
