@@ -63,8 +63,11 @@ export class DockviewPanelDirective implements OnDestroy {
     outputToObservable(this.dockviewInterface.didActivePanelChange)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(panel => {
-        if (this.panel() && this.panel()!.api.isActive !== this.isActive()) {
-          this.isActive.set(this.panel()!.api.isActive);
+        if (this.panel()) {
+          const isActive = panel?.id === this.id();
+          if (isActive !== this.isActive()) {
+            this.isActive.set(isActive);
+          }
         }
       });
 
@@ -107,6 +110,8 @@ export class DockviewPanelDirective implements OnDestroy {
                   ...this.initOptions() as Omit<AddPanelOptions<any>, 'floating' | 'position'>
                 }));
               }
+
+              this.isActive.set(this.panel()!.api.isActive);
             }
           } else if (this.panel()) {
             api?.removePanel(this.panel()!);
@@ -127,13 +132,13 @@ export class DockviewPanelDirective implements OnDestroy {
       
         explicitEffect([this.width, this.height], ([width, height]) => {
           if ((width || height) && this.panel()
-            && (this.panel()?.api.width !== width || this.panel()?.api.height !== height)) {
+            && (this.panel()!.api.width !== width || this.panel()!.api.height !== height)) {
             this.panel()!.api.setSize({ width: width || undefined, height: height || undefined });
           }
         }, { injector: this.injector as any });
 
         explicitEffect([this.isActive], ([isActive]) => {
-          if (isActive && this.panel() && !this.panel()?.api.isActive) {
+          if (isActive && this.panel() && !this.panel()!.api.isActive) {
             this.panel()!.api.setActive();
           }
         }, { injector: this.injector as any });

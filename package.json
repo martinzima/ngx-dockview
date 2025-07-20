@@ -1,6 +1,6 @@
 {
   "name": "ngx-dockview",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "author": "Martin Zima",
   "keywords": [
@@ -21,7 +21,7 @@
     "build:lib:prod": "ng build --project ngx-dockview --configuration production",
     "package": "npm run build:lib:prod && node scripts/update-lib-pkg.js",
     "publish": "npm publish --access public ./dist/ngx-dockview",
-    "watch": "ng build --watch --configuration development",
+    "watch": "ng build --watch --project ngx-dockview --configuration development",
     "test": "ng test"
   },
   "private": true,

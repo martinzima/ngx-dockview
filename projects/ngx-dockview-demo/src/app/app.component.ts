@@ -131,8 +131,8 @@ export class FourComponent {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
-  readonly isOneOpen = signal<boolean>(true);
-  readonly isTwoOpen = signal<boolean>(true);
+  readonly isOneOpen = signal<boolean>(false);
+  readonly isTwoOpen = signal<boolean>(false);
   readonly threes = signal<{ id: string, params: { count: number } }[]>([]);
   readonly fours = signal<{ id: string, params: {} }[]>([]);
   readonly time = signal<number>(Date.now());

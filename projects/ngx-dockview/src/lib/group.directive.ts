@@ -65,8 +65,11 @@ export class DockviewGroupDirective implements OnDestroy {
     outputToObservable(this.dockviewInterface.didActiveGroupChange)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(group => {
-        if (this.group() && this.group()!.api.isActive !== this.isActive()) {
-          this.isActive.set(this.group()!.api.isActive);
+        if (this.group()) {
+          const isActive = group?.id === this.id();
+          if (isActive !== this.isActive()) {
+            this.isActive.set(isActive);
+          }
         }
       });
 
