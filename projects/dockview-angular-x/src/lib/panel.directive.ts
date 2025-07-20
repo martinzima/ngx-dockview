@@ -114,24 +114,27 @@ export class DockviewPanelDirective implements OnDestroy {
         }, { injector: this.injector as any });
   
         explicitEffect([this.title], ([title]) => {
-          this.panel()?.api.setTitle(title || '');
+          if (title && this.panel() && this.panel()?.title !== title) {
+            this.panel()!.api.setTitle(title);
+          }
         }, { injector: this.injector as any });
 
         explicitEffect([this.params], ([params]) => {
-          if (params) {
-            this.panel()?.api.updateParameters(params);
+          if (params && this.panel() && this.panel()?.params !== params) {
+            this.panel()!.api.updateParameters(params);
           }
         }, { injector: this.injector as any });
       
         explicitEffect([this.width, this.height], ([width, height]) => {
-          if (width || height) {
-            this.panel()?.api.setSize({ width: width || undefined, height: height || undefined });
+          if ((width || height) && this.panel()
+            && (this.panel()?.api.width !== width || this.panel()?.api.height !== height)) {
+            this.panel()!.api.setSize({ width: width || undefined, height: height || undefined });
           }
         }, { injector: this.injector as any });
 
         explicitEffect([this.isActive], ([isActive]) => {
-          if (isActive) {
-            this.panel()?.api.setActive();
+          if (isActive && this.panel() && !this.panel()?.api.isActive) {
+            this.panel()!.api.setActive();
           }
         }, { injector: this.injector as any });
       });

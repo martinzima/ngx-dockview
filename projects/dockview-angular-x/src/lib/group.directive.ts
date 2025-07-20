@@ -98,12 +98,14 @@ export class DockviewGroupDirective implements OnDestroy {
         }, { injector: this.injector as any });
 
         explicitEffect([this.isVisible], ([isVisible]) => {
-          this.group()?.api.setVisible(isVisible);
+          if (this.group() && this.group()?.api.isVisible !== isVisible) {
+            this.group()!.api.setVisible(isVisible);
+          }
         }, { injector: this.injector as any });
 
         explicitEffect([this.width, this.height], ([width, height]) => {
-          if (width || height) {
-            this.group()?.api.setSize({ width: width || undefined, height: height || undefined });
+          if ((width || height) && this.group() && this.group()?.api.width !== width || this.group()?.api.height !== height) {
+            this.group()!.api.setSize({ width: width || undefined, height: height || undefined });
           }
         }, { injector: this.injector as any });
       });
