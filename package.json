@@ -1,12 +1,12 @@
 {
-  "name": "dockview-angular-x",
+  "name": "ngx-dockview",
   "version": "0.1.0",
   "license": "MIT",
   "author": "Martin Zima",
   "description": "Dockview bindings for Angular (unofficial). Dockview is a zero dependency Docking Layout Manager for the web, written in TypeScript.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/martinzima/dockview-angular-x"
+    "url": "https://github.com/martinzima/ngx-dockview"
   },
   "scripts": {
     "ng": "ng",

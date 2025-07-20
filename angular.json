@@ -3,20 +3,20 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "dockview-angular-x": {
+    "ngx-dockview": {
       "projectType": "library",
-      "root": "projects/dockview-angular-x",
-      "sourceRoot": "projects/dockview-angular-x/src",
+      "root": "projects/ngx-dockview",
+      "sourceRoot": "projects/ngx-dockview/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",
           "configurations": {
             "production": {
-              "tsConfig": "projects/dockview-angular-x/tsconfig.lib.prod.json"
+              "tsConfig": "projects/ngx-dockview/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/dockview-angular-x/tsconfig.lib.json"
+              "tsConfig": "projects/ngx-dockview/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -24,12 +24,12 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/dockview-angular-x/tsconfig.spec.json"
+            "tsConfig": "projects/ngx-dockview/tsconfig.spec.json"
           }
         }
       }
     },
-    "dockview-angular-x-demo": {
+    "ngx-dockview-demo": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -43,24 +43,24 @@
           "standalone": false
         }
       },
-      "root": "projects/dockview-angular-x-demo",
-      "sourceRoot": "projects/dockview-angular-x-demo/src",
+      "root": "projects/ngx-dockview-demo",
+      "sourceRoot": "projects/ngx-dockview-demo/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "projects/dockview-angular-x-demo/src/main.ts",
-            "tsConfig": "projects/dockview-angular-x-demo/tsconfig.app.json",
+            "browser": "projects/ngx-dockview-demo/src/main.ts",
+            "tsConfig": "projects/ngx-dockview-demo/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "projects/dockview-angular-x-demo/public"
+                "input": "projects/ngx-dockview-demo/public"
               }
             ],
             "styles": [
-              "projects/dockview-angular-x-demo/src/styles.scss"
+              "projects/ngx-dockview-demo/src/styles.scss"
             ]
           },
           "configurations": {
@@ -91,10 +91,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "dockview-angular-x-demo:build:production"
+              "buildTarget": "ngx-dockview-demo:build:production"
             },
             "development": {
-              "buildTarget": "dockview-angular-x-demo:build:development"
+              "buildTarget": "ngx-dockview-demo:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -105,16 +105,16 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/dockview-angular-x-demo/tsconfig.spec.json",
+            "tsConfig": "projects/ngx-dockview-demo/tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "projects/dockview-angular-x-demo/public"
+                "input": "projects/ngx-dockview-demo/public"
               }
             ],
             "styles": [
-              "projects/dockview-angular-x-demo/src/styles.scss"
+              "projects/ngx-dockview-demo/src/styles.scss"
             ]
           }
         }

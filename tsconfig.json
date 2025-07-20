@@ -6,8 +6,8 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "paths": {
-      "dockview-angular-x": [
-        "./dist/dockview-angular-x"
+      "ngx-dockview": [
+        "./dist/ngx-dockview"
       ]
     },
     "noFallthroughCasesInSwitch": true,
@@ -28,16 +28,16 @@
   "files": [],
   "references": [
     {
-      "path": "./projects/dockview-angular-x/tsconfig.lib.json"
+      "path": "./projects/ngx-dockview/tsconfig.lib.json"
     },
     {
-      "path": "./projects/dockview-angular-x/tsconfig.spec.json"
+      "path": "./projects/ngx-dockview/tsconfig.spec.json"
     },
     {
-      "path": "./projects/dockview-angular-x-demo/tsconfig.app.json"
+      "path": "./projects/ngx-dockview-demo/tsconfig.app.json"
     },
     {
-      "path": "./projects/dockview-angular-x-demo/tsconfig.spec.json"
+      "path": "./projects/ngx-dockview-demo/tsconfig.spec.json"
     }
   ]
 }

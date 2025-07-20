@@ -1,17 +1,17 @@
-# dockview-angular-x
+# ngx-dockview
 
 Dockview bindings for Angular (unofficial). Dockview is a zero dependency Docking Layout Manager for the web, written in TypeScript.
 
 ## Installation
 
 ```bash
-npm install dockview-angular-x dockview-core
+npm install ngx-dockview dockview-core
 ```
 
 ## Usage
 
 ```typescript
-import { DockviewComponent, DockviewPanelDirective, DockviewPanelTemplateDirective } from 'dockview-angular-x';
+import { DockviewComponent, DockviewPanelDirective, DockviewPanelTemplateDirective } from 'ngx-dockview';
 
 @Component({
   selector: 'app-root',

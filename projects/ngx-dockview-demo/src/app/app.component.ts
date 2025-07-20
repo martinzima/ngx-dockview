@@ -1,8 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DockviewComponent, DockviewDefaultTabComponent, DockviewGroupDirective, DockviewPanelDirective, DockviewPanelTemplateDirective, DockviewPanelViewType, DockviewTabTemplateDirective } from 'dockview-angular-x';
 import { DockviewPanelApi, themeLight } from 'dockview-core';
+import { DockviewComponent, DockviewDefaultTabComponent, DockviewGroupDirective, DockviewPanelDirective, DockviewPanelTemplateDirective, DockviewPanelViewType, DockviewTabTemplateDirective } from 'ngx-dockview';
 import { interval } from 'rxjs';
 
 @Component({
@@ -22,7 +22,7 @@ export class ThreeComponent {
   selector: 'dv-four',
   template: `
     <h1>Four</h1>
-    <button type="button" (click)="count.set(count() + 1)">Count: {{count()}}</button>
+    <button type="button" (click)="add()">Count: {{count()}}</button>
     <button type="button" (click)="api()?.close()">Close</button>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,12 +30,16 @@ export class ThreeComponent {
 export class FourComponent {
   readonly api = input<DockviewPanelApi>();
   protected readonly count = signal(0);
+
+  add() {
+    this.count.set(this.count() + 1);
+  }
 }
 
 @Component({
   selector: 'dv-root',
   template: `
-    <h1>dockview-angular-x demo</h1>
+    <h1>ngx-dockview demo</h1>
 
     <div style="margin-bottom: 16px;">
       <button (click)="isOneOpen.set(!isOneOpen())">Toggle One</button>
