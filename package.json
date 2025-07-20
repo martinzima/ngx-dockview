@@ -1,8 +1,15 @@
 {
   "name": "ngx-dockview",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "author": "Martin Zima",
+  "keywords": [
+    "angular",
+    "dockview",
+    "docking",
+    "layout",
+    "manager"
+  ],
   "description": "Dockview bindings for Angular (unofficial). Dockview is a zero dependency Docking Layout Manager for the web, written in TypeScript.",
   "repository": {
     "type": "git",
@@ -11,7 +18,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build:lib:prod": "ng build --project ngx-dockview --configuration production",
+    "package": "npm run build:lib:prod && node scripts/update-lib-pkg.js",
+    "publish": "npm publish --access public ./dist/ngx-dockview",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
