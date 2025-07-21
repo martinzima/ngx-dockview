@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DockviewPanelApi, themeLight } from 'dockview-core';
+import { DockviewApi, DockviewPanelApi, DockviewReadyEvent, themeLight } from 'dockview-core';
 import { DockviewComponent, DockviewDefaultTabComponent, DockviewGroupDirective, DockviewPanelDirective, DockviewPanelTemplateDirective, DockviewPanelViewType, DockviewTabTemplateDirective } from 'ngx-dockview';
 import { interval } from 'rxjs';
 
@@ -43,9 +43,13 @@ export class FourComponent {
 
     <div style="margin-bottom: 16px;">
       <button (click)="isOneOpen.set(!isOneOpen())">Toggle One</button>
+      <button (click)="isOneOpen.set(true)">Open One</button>
       <button (click)="isTwoOpen.set(!isTwoOpen())">Toggle Two</button>
+      <button (click)="isTwoOpen.set(true)">Open Two</button>
       <button (click)="addThree()">Add Three</button>
       <button (click)="addFour()">Add Four</button>
+      <button (click)="saveLayout()">Save Layout</button>
+      <button (click)="loadLayout()">Load Layout</button>
     </div>
 
     <dv-dockview style="flex-grow: 1; width: 100%;"
@@ -53,7 +57,8 @@ export class FourComponent {
       [viewTypes]="viewTypes"
       [tabComponentTypes]="tabComponentTypes"
       [prefixHeaderActionsTemplate]="prefixHeaderActionsTemplate"
-      [watermarkTemplate]="watermarkTemplate">
+      [watermarkTemplate]="watermarkTemplate"
+      (ready)="onReady($event)">
       <ng-template #prefixHeaderActionsTemplate>
         <div style="line-height: 35px; padding: 0 8px;">LOGO</div>
       </ng-template>
@@ -131,6 +136,7 @@ export class FourComponent {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
+  readonly api = signal<DockviewApi | null>(null);
   readonly isOneOpen = signal<boolean>(false);
   readonly isTwoOpen = signal<boolean>(false);
   readonly threes = signal<{ id: string, params: { count: number } }[]>([]);
@@ -162,11 +168,38 @@ export class AppComponent {
     }
   };
 
+  onReady(event: DockviewReadyEvent) {
+    this.api.set(event.api);
+  }
+
   addThree() {
-    this.threes.update(threes => [...threes, { id: `three-${threes.length}`, params: { count: threes.length } }]);
+    let id: string, i = 0;
+    do {
+      id = `three-${i}`;
+      i++;
+    } while (this.api()?.getPanel(id));
+    
+    this.threes.update(threes => [...threes, { id, params: { count: threes.length } }]);
   }
 
   addFour() {
-    this.fours.update(fours => [...fours, { id: `four-${fours.length}`, params: {} }]);
+    let id: string, i = 0;
+    do {
+      id = `four-${i}`;
+      i++;
+    } while (this.api()?.getPanel(id));
+    
+    this.fours.update(fours => [...fours, { id, params: {} }]);
+  }
+
+  saveLayout() {
+    localStorage.setItem('layout', JSON.stringify(this.api()?.toJSON()));
+  }
+
+  loadLayout() {
+    const layout = localStorage.getItem('layout');
+    if (layout) {
+      this.api()?.fromJSON(JSON.parse(layout));
+    }
   }
 }
