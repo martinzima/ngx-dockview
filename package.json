@@ -10,7 +10,7 @@
     "layout",
     "manager"
   ],
-  "description": "Dockview bindings for Angular (unofficial). Dockview is a zero dependency Docking Layout Manager for the web, written in TypeScript.",
+  "description": "Dockview wrapper for Angular (unofficial). Dockview is a zero dependency Docking Layout Manager for the web, written in TypeScript.",
   "repository": {
     "type": "git",
     "url": "https://github.com/martinzima/ngx-dockview"

@@ -4,7 +4,9 @@
 [![npm downloads](https://img.shields.io/npm/dm/ngx-dockview.svg)](https://www.npmjs.com/package/ngx-dockview)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Dockview bindings for Angular (unofficial). Dockview is a zero dependency Docking Layout Manager for the web, written in TypeScript.
+Dockview wrapper for Angular (unofficial). Dockview is a zero dependency Docking Layout Manager for the web, written in TypeScript.
+
+**THIS IS STILL IN DEVELOPMENT AS OF NOW (2025-07) AND NOT READY FOR PRODUCTION USE.**
 
 ## Installation
 
