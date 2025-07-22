@@ -56,10 +56,10 @@ export class DockviewGroupDirective implements OnDestroy {
         }
       });
 
-    outputToObservable(this.dockviewInterface.didRemovePanel)
+    outputToObservable(this.dockviewInterface.didRemoveGroup)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(panel => {
-        if (panel.id === this.id()) {
+      .subscribe(group => {
+        if (group.id === this.id()) {
           if (this.isOpen()) {
             this.isOpen.set(false);
           }
